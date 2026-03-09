@@ -28,7 +28,6 @@ val jnnfrpyn: Contributor = Contributor("jnnfrpyn"):
               styleAttr := "width: 40px; height: 40px; border-radius: 50%; background-color: #fd6161"
             )
           )
-        )
-      )
+        ))
     )
   }
