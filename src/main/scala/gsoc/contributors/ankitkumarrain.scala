@@ -9,10 +9,8 @@ import calico.syntax.*
 
 val ankitkumarrain: Contributor = Contributor("ankitkumarrain"):
   SignallingRef[IO].of(false).toResource.flatMap { clicked =>
-
     div(
       p("I love open-source projects and looking forward to excel with Typelevel Projects and their Maintainers"),
-
       button(
         styleAttr := "background-color: rgb(5, 107, 48); color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;",
         "lets connect ?",
@@ -28,7 +26,5 @@ val ankitkumarrain: Contributor = Contributor("ankitkumarrain"):
         case false =>
           div("")
       }
-
-
     )
   }
