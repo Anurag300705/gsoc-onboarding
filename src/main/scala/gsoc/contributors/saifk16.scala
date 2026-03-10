@@ -13,10 +13,10 @@ object ReactionState:
     case Idle, Wait, Ready, Done
 
   case class State(
-    phase: Phase,
-    msg: String,
-    clicked: Option[Long] = None,
-    took: Option[Long] = None
+      phase: Phase,
+      msg: String,
+      clicked: Option[Long] = None,
+      took: Option[Long] = None
   )
 
   val fresh = State(Phase.Idle, "press start and then react")
@@ -33,36 +33,43 @@ val saifk16: Contributor = Contributor("saifk16"):
       _ <- gs.set(fresh.copy(phase = Wait, msg = "wait wait wait wait wait"))
       _ <- IO.sleep(2.seconds)
       t <- getTime
-      _ <- gs.update(_.copy(phase = Ready, msg = "click", clicked = Some(t)))
+      _ <- gs.modify { s =>
+        if s.phase == Wait then (s.copy(phase = Ready, msg = "click", clicked = Some(t)), ())
+        else (s, ())
+      }
     yield ()
 
     val react = gs.get.flatMap { s =>
       if s.phase == Ready then
         for
-          t  <- getTime
+          t <- getTime
           diff = s.clicked.map(t - _)
-          _ <- gs.update(_.copy(
-                 phase = Done,
-                 msg = s"${diff.getOrElse(0L)} ms",
-                 took = diff
-               ))
+          _ <- gs.update(
+            _.copy(
+              phase = Done,
+              msg = s"${diff.getOrElse(0L)} ms",
+              took = diff
+            ))
         yield ()
-      else if s.phase == Wait then
-        gs.update(_.copy(phase = Idle, msg = "too early"))
-      else
-        IO.unit
+      else if s.phase == Wait then gs.update(_.copy(phase = Idle, msg = "too early"))
+      else IO.unit
     }
 
     val reset = gs.set(fresh)
 
     div(
-      p("Hii, I am ",
-        calico.html.io.span(
-          styleAttr := "color: #0f899c; font-weight: bold",
-          "@saifk16"
-        ),
-        " and I agree to follow Typelevel CoC and GSoC AI policy."),
-      p("fastest clicker in this world?"),
+      p(
+        "Hi, I am ",
+        calico
+          .html
+          .io
+          .span(
+            styleAttr := "color: #0f899c; font-weight: bold",
+            "@saifk16"
+          ),
+        " and I agree to follow Typelevel CoC and GSoC AI policy."
+      ),
+      p("Fastest clicker in the world?"),
       gs.map(s => p(s.msg)),
       button(onClick --> (_.foreach(_ => start)), "start"),
       button(onClick --> (_.foreach(_ => react)), "react"),
